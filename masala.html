@@ -163,7 +163,7 @@ add("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n"+xr+"\n%%EOF");
 return new Blob(parts,{type:"application/pdf"});
 }
 
-document.getElementById("pdf").onclick=function(){try{var bl=mkPdf(),u=URL.createObjectURL(bl),a=document.createElement("a");a.href=u;a.download="RR-"+CFG.key+".pdf";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}catch(e){alert("PDF বানানো যায়নি।")}};
+document.getElementById("pdf").onclick=function(){try{var bl=mkPdf(),u=URL.createObjectURL(bl),a=document.createElement("a");a.href=u;a.download="JQ-masala-"+S.y+"-"+(+S.m+1)+".pdf";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}catch(e){alert("PDF বানানো যায়নি।")}};
 function openFs(){try{mkPdf()}catch(e){}document.getElementById("fsi").src=PVURL;document.getElementById("fs").className="fs on"}
 function closeFs(){document.getElementById("fs").className="fs"}
 document.getElementById("pvb").onclick=openFs;
