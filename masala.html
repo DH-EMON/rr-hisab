@@ -62,6 +62,7 @@ td.rt input{width:104px;border:0;background:transparent;color:var(--red);font:in
 td.jn{color:var(--tx);font-size:14px;padding:9px 8px;font-weight:600}
 td.x{padding:0 2px}
 td.x button{border:0;background:none;color:var(--bad);font-size:20px;padding:4px 8px;line-height:1}
+td.tot{font-size:19px;font-weight:800;color:var(--red);background:var(--ac2);padding:0 12px;min-width:110px}
 td.sn{min-width:40px;font-size:13px;font-weight:600;padding:9px 6px}
 td.nm{min-width:110px}
 th.l,td.l{position:static;min-width:0;max-width:none}
@@ -101,9 +102,9 @@ function ttlTxt(){return "মাসিক মজুদ গণনা বোর্
 var T=document.getElementById("tb"),jin=document.getElementById("jon"),msel=document.getElementById("msel"),ysel=document.getElementById("ysel");
 function head(){document.getElementById("h1").textContent=ttlTxt()}
 function build(){
-var h='<tr><th>ক্র/<br>নং</th><th>আইটেম</th><th>জনবল</th><th>× হার</th><th>= পরিমাণ<small>কেজি</small></th><th></th></tr>';
+var h='<tr><th>ক্র/<br>নং</th><th>আইটেম</th><th>জনবল</th><th>× হার</th><th>= পরিমাণ<small>কেজি</small></th><th>মোট পরিমাণ<small>কেজি</small></th><th></th></tr>';
 S.items.forEach(function(it,i){
-h+='<tr><td class="sn">'+toBn(i+1)+'।</td><td class="nm"><input class="in" data-i="'+i+'" aria-label="আইটেম"></td><td class="jn" id="j'+i+'"></td><td class="rt"><input class="ir" type="text" inputmode="decimal" data-i="'+i+'" aria-label="হার"></td><td class="v" id="r'+i+'"></td><td class="x"><button class="dl" data-i="'+i+'" aria-label="মুছুন">×</button></td></tr>';
+h+='<tr><td class="sn">'+toBn(i+1)+'।</td><td class="nm"><input class="in" data-i="'+i+'" aria-label="আইটেম"></td><td class="jn" id="j'+i+'"></td><td class="rt"><input class="ir" type="text" inputmode="decimal" data-i="'+i+'" aria-label="হার"></td><td class="v" id="r'+i+'"></td>'+(i==0?'<td class="tot" id="tot" rowspan="'+S.items.length+'"></td>':'')+'<td class="x"><button class="dl" data-i="'+i+'" aria-label="মুছুন">×</button></td></tr>';
 });
 T.innerHTML=h;
 T.querySelectorAll(".in").forEach(function(e){var i=+e.dataset.i;e.value=S.items[i].n;e.oninput=function(){S.items[i].n=this.value;save()}});
@@ -114,7 +115,8 @@ e.onblur=function(){this.value=rf(S.items[i].r)}});
 T.querySelectorAll(".dl").forEach(function(b){b.onclick=function(){var i=+this.dataset.i;if(confirm("\""+S.items[i].n+"\" মুছবেন?")){S.items.splice(i,1);save();build()}}});
 calc();
 }
-function calc(){S.items.forEach(function(it,i){var a=document.getElementById("j"+i),b=document.getElementById("r"+i);if(a)a.textContent=toBn(S.jon);if(b)b.textContent=f(S.jon*it.r)})}
+function tot(){var s=0;S.items.forEach(function(it){s+=S.jon*it.r});return s}
+function calc(){var te=document.getElementById("tot");if(te)te.textContent=f(tot());S.items.forEach(function(it,i){var a=document.getElementById("j"+i),b=document.getElementById("r"+i);if(a)a.textContent=toBn(S.jon);if(b)b.textContent=f(S.jon*it.r)})}
 (function(){var h="";MN.forEach(function(n,i){h+='<option value="'+i+'">'+n+'</option>'});msel.innerHTML=h;h="";for(var y=2020;y<=2045;y++)h+='<option value="'+y+'">'+toBn(y)+'</option>';ysel.innerHTML=h})();
 function sync(){msel.value=S.m;ysel.value=S.y;jin.value=toBn(S.jon);head()}
 msel.onchange=function(){S.m=this.value;save();head()};
@@ -126,7 +128,7 @@ document.getElementById("add").onclick=function(){S.items.push({n:"নতুন"
 document.getElementById("rst").onclick=function(){if(confirm("জনবল ০ করে সব পরিমাণ ০ করবেন?")){S.jon=0;save();sync();calc()}};
 var PVURL="";
 function mkPdf(){
-var sc=2,pad=16,cwid=[50,190,110,150,150],rh=36,hh=44,W=pad*2+cwid.reduce(function(a,b){return a+b},0),n=S.items.length;
+var sc=2,pad=16,cwid=[50,190,110,150,150,150],rh=36,hh=44,W=pad*2+cwid.reduce(function(a,b){return a+b},0),n=S.items.length;
 var H=pad*2+84+hh+n*rh+40;
 var cv=document.createElement("canvas");cv.width=W*sc;cv.height=H*sc;
 var x=cv.getContext("2d");x.scale(sc,sc);x.fillStyle="#fff";x.fillRect(0,0,W,H);
@@ -136,14 +138,15 @@ function fit(t,mw,size,bold){var s=size;for(;;){x.font=(bold?"bold ":"")+s+"px "
 function box(a,b,w,h,fill){if(fill){x.fillStyle=fill;x.fillRect(a,b,w,h)}x.strokeStyle="#777";x.lineWidth=1;x.strokeRect(a,b,w,h)}
 x.textAlign="center";x.fillStyle="#111";fit(ttlTxt(),W-2*pad,20,true);x.fillText(ttlTxt(),W/2,pad+16);
 x.font="bold 17px "+FF;x.fillText("সৈনিক মেস জনবল = "+toBn(S.jon),W/2,pad+54);
-var y=pad+84,heads=["ক্র/নং","আইটেম","জনবল","× হার","= পরিমাণ (কেজি)"],xx=pad;
+var y=pad+84,heads=["ক্র/নং","আইটেম","জনবল","× হার","= পরিমাণ (কেজি)","মোট পরিমাণ (কেজি)"],xx=pad;
 heads.forEach(function(t,i){box(xx,y,cwid[i],hh,PL);x.fillStyle="#111";fit(t,cwid[i]-8,14,true);x.fillText(t,xx+cwid[i]/2,y+hh/2);xx+=cwid[i]});
-y+=hh;
+y+=hh;var ys=y;
 S.items.forEach(function(it,i){
 var cells=[toBn(i+1)+"।",it.n,toBn(S.jon),rf(it.r),f(S.jon*it.r)];xx=pad;
 cells.forEach(function(t,k){box(xx,y,cwid[k],rh,k==4?PL:null);x.fillStyle=k==3||k==4?"#c0201a":"#111";x.textAlign=k==1?"left":"center";fit(t,cwid[k]-12,14,k==1||k==4);x.fillText(t,k==1?xx+8:xx+cwid[k]/2,y+rh/2);xx+=cwid[k]});
 x.textAlign="center";y+=rh;
 });
+if(n>0){var tx=pad+cwid[0]+cwid[1]+cwid[2]+cwid[3]+cwid[4];box(tx,ys,cwid[5],n*rh,PL);x.fillStyle="#c0201a";x.textAlign="center";fit(f(tot()),cwid[5]-12,20,true);x.fillText(f(tot()),tx+cwid[5]/2,ys+n*rh/2)}
 x.fillStyle="#555";x.font="12px "+FF;x.textAlign="center";x.fillText("Create by Ocu Emon",W/2,H-pad-2);
 var b64=cv.toDataURL("image/jpeg",0.92).split(",")[1];PVURL="data:image/jpeg;base64,"+b64;
 var bin=atob(b64),jpg=new Uint8Array(bin.length);for(var q=0;q<bin.length;q++)jpg[q]=bin.charCodeAt(q);
